@@ -17,6 +17,7 @@ import (
 	"github.com/hackerrithm/longterm/rfx/pkg/http/rest"
 	"github.com/hackerrithm/longterm/rfx/pkg/storage/asjson"
 	"github.com/hackerrithm/longterm/rfx/pkg/storage/inmemory"
+	"github.com/hackerrithm/longterm/rfx/pkg/storage/mongo"
 )
 
 // Type defines available storage types
@@ -27,6 +28,8 @@ const (
 	JSON Type = iota
 	// Memory will store data in memory
 	Memory
+	// MONGO...
+	MONGO Type = iota
 	// REST will use rest
 	REST Type = iota
 	// GRAPHQL will make use of graphql
@@ -39,7 +42,7 @@ func StartServer() {
 	var r http.Handler
 
 	// set up storage
-	storageType := JSON
+	storageType := MONGO
 	httpType := REST
 
 	var authenticater authenticating.Service
@@ -53,6 +56,12 @@ func StartServer() {
 
 	case JSON:
 		s, _ := asjson.NewStorage()
+
+		authenticater = authenticating.NewService(s)
+		lister = listing.NewService(s)
+
+	case MONGO:
+		s, _ := mongo.NewStorage()
 
 		authenticater = authenticating.NewService(s)
 		lister = listing.NewService(s)

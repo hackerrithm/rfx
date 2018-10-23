@@ -11,27 +11,12 @@ type (
 
 	// User represents the model of a user
 	User struct {
-		// gorm.Model
-		UID        int    //`gorm:"unique"`
-		UserName   string `json:"username" gorm:"unique"`
-		Password   string `json:"password"`
-		Gender     string `json:"gender"`
-		FirstName  string `json:"firstname"`
-		LastName   string `json:"lastname"`
-		MiddleName string `json:"middlename"`
-		// Status           string        `json:"status"`
-		// Role             string        `json:"role"`
-		// Languages        []Language    `gorm:"many2many:user_languages"`
-		// BillingAddress   Address       `json:"billingAddress"` // One-To-One relationship (belongs to - use BillingAddressID as foreign key)
-		// BillingAddressID sql.NullInt64 `json:"billingAddressID"`
-		// MailingAddress   Address       `json:"mailingAddress"` // One-To-One relationship (belongs to - use MailingAddressID as foreign key)
-		// MailingAddressID sql.NullInt64 `json:"mailingAddressID"`
-		// Contact          []Contact     `json:"contact"`
-		// // Profile          Profile       `json:"profile"`
-		// ProfileID      uint
-		// EmailAddresses []EmailAddress `json:"emailAddress" gorm:"unique"`
-		// DateofBirth    time.Time      `json:"dateofBirth"`
-		// DateJoined     time.Time      `json:"dateJoined"`
+		UID       int
+		UserName  string `bson:"username" json:"username"`
+		Password  string `bson:"password" json:"password"`
+		Gender    string `bson:"gender" json:"gender"`
+		FirstName string `bson:"firstname" json:"firstname"`
+		LastName  string `bson:"lastname" json:"lastname"`
 	}
 
 	// EmailAddress represents email addresses

@@ -82,7 +82,6 @@ func (s *service) AddSampleUsers(data Payload) <-chan Event {
 			err := s.uSR.AddUser(b)
 			if err != nil {
 				if err == ErrDuplicate {
-					// forgive the naughty error type checking above...
 					results <- UserAlreadyExists
 					continue
 				}
