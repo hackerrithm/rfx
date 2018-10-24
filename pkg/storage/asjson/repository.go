@@ -2,6 +2,7 @@ package asjson
 
 import (
 	"encoding/json"
+	"fmt"
 	"log"
 	"path"
 	"runtime"
@@ -175,4 +176,69 @@ func (s *Storage) Login(username string, password string) ([]byte, error) {
 		}
 	}
 	return result, nil
+}
+
+// SignUp ...
+func (s *Storage) SignUp(username string, password string, firstname string, lastname string) ([]byte, error) {
+
+	var user authenticating.User
+	var result []byte
+
+	user.UserName = username
+	user.Password = password
+	user.FirstName = firstname
+	user.LastName = lastname
+	user.Gender = ""
+
+	existingUsers := s.GetAllUsers()
+	for _, e := range existingUsers {
+		if user.UserName == e.UserName &&
+			user.FirstName == e.FirstName &&
+			user.LastName == e.LastName {
+			return nil, authenticating.ErrDuplicate
+		}
+	}
+
+	newU := User{
+		UID:       len(existingUsers) + 1,
+		UserName:  user.UserName,
+		FirstName: user.FirstName,
+		LastName:  user.LastName,
+		Gender:    user.Gender,
+		Password:  user.Password,
+	}
+	// m.users = append(m.users, newU)
+
+	resource := strconv.Itoa(newU.UID)
+	if err := s.db.Write(CollectionUser, resource, newU); err != nil {
+		fmt.Println("success")
+	}
+
+	claims := JWTData{
+		StandardClaims: jwt.StandardClaims{
+			ExpiresAt: time.Now().Add(time.Hour).Unix(),
+		},
+
+		CustomClaims: map[string]string{
+			"userid": "u1",
+		},
+	}
+
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+	tokenString, err := token.SignedString([]byte( /*SECRET*/ "asdad"))
+	if err != nil {
+		log.Println("StatusUnauthorized ", err)
+	}
+
+	result, err = json.Marshal(struct {
+		Token string `json:"token"`
+	}{
+		tokenString,
+	})
+
+	if err != nil {
+		log.Println("StatusUnauthorized ", err)
+	}
+	return result, nil
+
 }

@@ -46,6 +46,7 @@ type Service interface {
 	AddUser(...User)
 	AddSampleUsers(Payload) <-chan Event
 	Login(string, string) ([]byte, error)
+	SignUp(string, string, string, string) ([]byte, error)
 }
 
 // Repository provides access to user repository.
@@ -54,6 +55,8 @@ type Repository interface {
 	AddUser(User) error
 	// Login returns a token if user is in storage.
 	Login(string, string) ([]byte, error)
+	// SignUp inserts a new user and returns a token if user is in storage.
+	SignUp(string, string, string, string) ([]byte, error)
 }
 
 type service struct {
@@ -99,4 +102,9 @@ func (s *service) AddSampleUsers(data Payload) <-chan Event {
 // Login ...
 func (s *service) Login(username string, password string) ([]byte, error) {
 	return s.uSR.Login(username, password)
+}
+
+// SignUp ...
+func (s *service) SignUp(username string, password string, firstname string, lastname string) ([]byte, error) {
+	return s.uSR.SignUp(username, password, firstname, lastname)
 }

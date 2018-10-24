@@ -86,3 +86,44 @@ func (m *Storage) Login(username string, password string) ([]byte, error) {
 	}
 	return result, nil
 }
+
+// SignUp ...
+func (m *Storage) SignUp(username string, password string, firstname string, lastname string) ([]byte, error) {
+
+	var user authenticating.User
+	var result []byte
+
+	user.UserName = username
+	user.Password = password
+	user.FirstName = firstname
+	user.LastName = lastname
+	user.Gender = ""
+
+	claims := JWTData{
+		StandardClaims: jwt.StandardClaims{
+			ExpiresAt: time.Now().Add(time.Hour).Unix(),
+		},
+
+		CustomClaims: map[string]string{
+			"userid": "u1",
+		},
+	}
+
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+	tokenString, err := token.SignedString([]byte( /*SECRET*/ "asdad"))
+	if err != nil {
+		log.Println("StatusUnauthorized ", err)
+	}
+
+	result, err = json.Marshal(struct {
+		Token string `json:"token"`
+	}{
+		tokenString,
+	})
+
+	if err != nil {
+		log.Println("StatusUnauthorized ", err)
+	}
+	return result, nil
+
+}
