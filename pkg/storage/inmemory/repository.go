@@ -48,7 +48,7 @@ type JWTData struct {
 }
 
 // Login ...
-func (m *Storage) Login(username string, password string) ([]byte, error) {
+func (m *Storage) Login(username string, password string) (interface{}, error) {
 
 	var user authenticating.User
 	var result []byte
@@ -88,7 +88,7 @@ func (m *Storage) Login(username string, password string) ([]byte, error) {
 }
 
 // SignUp ...
-func (m *Storage) SignUp(username string, password string, firstname string, lastname string) ([]byte, error) {
+func (m *Storage) SignUp(username string, password string, firstname string, lastname string) (interface{}, error) {
 
 	var user authenticating.User
 	var result []byte

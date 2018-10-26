@@ -20,6 +20,8 @@ type Storage struct {
 
 var db *mgo.Database
 
+var returnObjectMap map[string]interface{}
+
 const (
 	// COLLECTION ...
 	COLLECTION = "user"
@@ -81,8 +83,8 @@ type JWTData struct {
 }
 
 // SignUp ...
-func (s *Storage) SignUp(username string, password string, firstname string, lastname string) ([]byte, error) {
-
+func (s *Storage) SignUp(username string, password string, firstname string, lastname string) (interface{}, error) {
+	returnObjectMap = make(map[string]interface{})
 	var user authenticating.User
 	var result []byte
 
@@ -93,10 +95,18 @@ func (s *Storage) SignUp(username string, password string, firstname string, las
 	user.Gender = ""
 
 	err := db.C(COLLECTION).Insert(&user)
+	fmt.Println("user: ", user)
+	if err != nil {
+		return nil, err
+	}
+
+	err = db.C(COLLECTION).Find(bson.M{"username": user.UserName}).One(&user)
 
 	if err != nil {
 		return nil, err
 	}
+
+	var userUID = user.UID.Hex()
 
 	claims := JWTData{
 		StandardClaims: jwt.StandardClaims{
@@ -107,7 +117,6 @@ func (s *Storage) SignUp(username string, password string, firstname string, las
 			"userid": "u1",
 		},
 	}
-
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 	tokenString, err := token.SignedString([]byte( /*SECRET*/ "asdad"))
 	if err != nil {
@@ -123,13 +132,17 @@ func (s *Storage) SignUp(username string, password string, firstname string, las
 	if err != nil {
 		log.Println("StatusUnauthorized ", err)
 	}
-	return result, nil
+
+	returnObjectMap["token"] = result
+	returnObjectMap["userUID"] = userUID
+
+	return returnObjectMap, nil
 
 }
 
 // Login ...
-func (s *Storage) Login(username string, password string) ([]byte, error) {
-
+func (s *Storage) Login(username string, password string) (interface{}, error) {
+	returnObjectMap = make(map[string]interface{})
 	var user listing.User
 	var result []byte
 
@@ -142,6 +155,7 @@ func (s *Storage) Login(username string, password string) ([]byte, error) {
 		return nil, err
 	}
 
+	var userUID = user.UID.Hex()
 	// Demo - in case no db
 	// if user.UserName == "admin" && user.Password == "password" {
 
@@ -170,5 +184,9 @@ func (s *Storage) Login(username string, password string) ([]byte, error) {
 	if err != nil {
 		log.Println("StatusUnauthorized ", err)
 	}
-	return result, nil
+
+	returnObjectMap["token"] = result
+	returnObjectMap["userUID"] = userUID
+
+	return returnObjectMap, nil
 }

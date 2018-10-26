@@ -86,7 +86,7 @@ func (s *Storage) GetUser(id int) (listing.User, error) {
 		return user, listing.ErrNotFound
 	}
 
-	user.UID = b.UID
+	// user.UID = string(b.UID)
 	user.UserName = b.UserName
 	user.FirstName = b.FirstName
 	user.LastName = b.LastName
@@ -115,7 +115,7 @@ func (s *Storage) GetAllUsers() []listing.User {
 			return list
 		}
 
-		user.UID = b.UID
+		// user.UID = b.UID
 		user.UserName = b.UserName
 		user.FirstName = b.FirstName
 		user.LastName = b.LastName
@@ -139,7 +139,7 @@ type JWTData struct {
 }
 
 // Login ...
-func (s *Storage) Login(username string, password string) ([]byte, error) {
+func (s *Storage) Login(username string, password string) (interface{}, error) {
 
 	var user listing.User
 	var result []byte
@@ -179,7 +179,7 @@ func (s *Storage) Login(username string, password string) ([]byte, error) {
 }
 
 // SignUp ...
-func (s *Storage) SignUp(username string, password string, firstname string, lastname string) ([]byte, error) {
+func (s *Storage) SignUp(username string, password string, firstname string, lastname string) (interface{}, error) {
 
 	var user authenticating.User
 	var result []byte

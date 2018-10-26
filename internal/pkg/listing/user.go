@@ -1,15 +1,16 @@
 package listing
 
+import "gopkg.in/mgo.v2/bson"
+
 type (
 	// User represents the model of a user
 	User struct {
-		UID int
-		// gorm.Model
-		UserName  string `bson:"username" json:"username"`
-		Password  string `bson:"password" json:"password"`
-		Gender    string `bson:"gender" json:"gender"`
-		FirstName string `bson:"firstname" json:"firstname"`
-		LastName  string `bson:"lastname" json:"lastname"`
+		UID       bson.ObjectId `bson:"_id" json:"id"`
+		UserName  string        `bson:"username" json:"username"`
+		Password  string        `bson:"password" json:"password"`
+		Gender    string        `bson:"gender" json:"gender"`
+		FirstName string        `bson:"firstname" json:"firstname"`
+		LastName  string        `bson:"lastname" json:"lastname"`
 	}
 
 	// EmailAddress represents email addresses

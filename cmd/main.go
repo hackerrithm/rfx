@@ -1,8 +1,6 @@
 package main
 
 import (
-	"fmt"
-
 	"github.com/hackerrithm/longterm/rfx/internal/pkg/server"
 )
 
@@ -12,6 +10,5 @@ func Hello() string {
 }
 
 func main() {
-	fmt.Println(Hello())
 	server.StartServer()
 }

@@ -102,12 +102,12 @@ var rootMutation = graphql.NewObject(graphql.ObjectConfig{
 				gender, _ := params.Args["gnder"].(string)
 
 				// figure out new id
-				newID := RandNumberRunes()
+				// newID := RandNumberRunes()
 
 				// perform mutation operation here
 				// for e.g. create a User and save to DB.
 				newUser := authenticating.User{
-					UID:       newID,
+					// UID:       newID,
 					UserName:  username,
 					FirstName: firstname,
 					LastName:  lastanme,
