@@ -34,7 +34,6 @@ func NewStorage() (*Storage, error) {
 		log.Fatal(err)
 	}
 	db = session.DB("test1")
-	fmt.Println("connected")
 	return &Storage{db.Name}, err
 }
 
@@ -95,18 +94,18 @@ func (s *Storage) SignUp(username string, password string, firstname string, las
 	user.Gender = ""
 
 	err := db.C(COLLECTION).Insert(&user)
-	fmt.Println("user: ", user)
+	// fmt.Println("user: ", user)
 	if err != nil {
 		return nil, err
 	}
 
-	err = db.C(COLLECTION).Find(bson.M{"username": user.UserName}).One(&user)
+	// err = db.C(COLLECTION).Find(bson.M{"username": user.UserName}).One(&user)
 
-	if err != nil {
-		return nil, err
-	}
+	// if err != nil {
+	// 	return nil, err
+	// }
 
-	var userUID = user.UID.Hex()
+	// var userUID = user.UID.Hex()
 
 	claims := JWTData{
 		StandardClaims: jwt.StandardClaims{
@@ -133,8 +132,10 @@ func (s *Storage) SignUp(username string, password string, firstname string, las
 		log.Println("StatusUnauthorized ", err)
 	}
 
+	fmt.Println("got here")
+
 	returnObjectMap["token"] = result
-	returnObjectMap["userUID"] = userUID
+	returnObjectMap["userUID"] = ""
 
 	return returnObjectMap, nil
 
@@ -165,7 +166,7 @@ func (s *Storage) Login(username string, password string) (interface{}, error) {
 		},
 
 		CustomClaims: map[string]string{
-			"userid": "u1",
+			"userid": userUID,
 		},
 	}
 
