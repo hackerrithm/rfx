@@ -7,8 +7,7 @@ import (
 	"time"
 
 	jwt "github.com/dgrijalva/jwt-go"
-	"github.com/hackerrithm/longterm/rfx/internal/pkg/authenticating"
-	"github.com/hackerrithm/longterm/rfx/internal/pkg/listing"
+	"github.com/hackerrithm/longterm/rfx/user/pkg/authenticating"
 	mgo "gopkg.in/mgo.v2"
 	"gopkg.in/mgo.v2/bson"
 )
@@ -35,40 +34,6 @@ func NewStorage() (*Storage, error) {
 	}
 	db = session.DB("test1")
 	return &Storage{db.Name}, err
-}
-
-// GetAllUsers ...
-func (s *Storage) GetAllUsers() []listing.User {
-	var movies []listing.User
-	err := db.C(COLLECTION).Find(bson.M{}).All(&movies)
-	fmt.Println(err)
-	return movies
-}
-
-// GetUser ...
-func (s *Storage) GetUser(idsub int) (listing.User, error) {
-	var id = string(idsub)
-	var user listing.User
-	err := db.C(COLLECTION).FindId(bson.ObjectIdHex(id)).One(&user)
-	return user, err
-}
-
-// AddUser ...
-func (s *Storage) AddUser(user authenticating.User) error {
-	err := db.C(COLLECTION).Insert(&user)
-	return err
-}
-
-// Delete ...
-func (s *Storage) Delete(user User) error {
-	err := db.C(COLLECTION).Remove(&user)
-	return err
-}
-
-// Update ...
-func (s *Storage) Update(user User) error {
-	err := db.C(COLLECTION).UpdateId(user.UID, &user)
-	return err
 }
 
 // TODO: to be implemented
@@ -144,7 +109,7 @@ func (s *Storage) SignUp(username string, password string, firstname string, las
 // Login ...
 func (s *Storage) Login(username string, password string) (interface{}, error) {
 	returnObjectMap = make(map[string]interface{})
-	var user listing.User
+	var user authenticating.User
 	var result []byte
 
 	user.UserName = username

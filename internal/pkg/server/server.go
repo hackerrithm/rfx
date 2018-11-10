@@ -11,13 +11,9 @@ import (
 	"time"
 
 	cfg "github.com/hackerrithm/longterm/rfx/configs"
-	"github.com/hackerrithm/longterm/rfx/internal/pkg/authenticating"
-	"github.com/hackerrithm/longterm/rfx/internal/pkg/listing"
-	"github.com/hackerrithm/longterm/rfx/pkg/http/graphql"
-	"github.com/hackerrithm/longterm/rfx/pkg/http/rest"
-	"github.com/hackerrithm/longterm/rfx/pkg/storage/asjson"
-	"github.com/hackerrithm/longterm/rfx/pkg/storage/inmemory"
-	"github.com/hackerrithm/longterm/rfx/pkg/storage/mongo"
+	"github.com/hackerrithm/longterm/rfx/user/pkg/authenticating"
+	"github.com/hackerrithm/longterm/rfx/user/pkg/http/rest"
+	"github.com/hackerrithm/longterm/rfx/user/pkg/storage/mongo"
 )
 
 // Type defines available storage types
@@ -46,32 +42,29 @@ func StartServer() {
 	httpType := REST
 
 	var authenticater authenticating.Service
-	var lister listing.Service
 
 	switch storageType {
-	case Memory:
-		s := new(inmemory.Storage)
+	// case Memory:
+	// 	s := new(inmemory.Storage)
 
-		authenticater = authenticating.NewService(s)
+	// 	authenticater = authenticating.NewService(s)
 
-	case JSON:
-		s, _ := asjson.NewStorage()
+	// case JSON:
+	// 	s, _ := asjson.NewStorage()
 
-		authenticater = authenticating.NewService(s)
-		lister = listing.NewService(s)
+	// authenticater = authenticating.NewService(s)
 
 	case MONGO:
 		s, _ := mongo.NewStorage()
 
 		authenticater = authenticating.NewService(s)
-		lister = listing.NewService(s)
 	}
 
 	switch httpType {
 	case REST:
-		r = rest.Handler(authenticater, lister)
-	case GRAPHQL:
-		r = graphql.SetupMux()
+		r = rest.Handler(authenticater)
+		// case GRAPHQL:
+		// 	r = graphql.SetupMux()
 
 	}
 
