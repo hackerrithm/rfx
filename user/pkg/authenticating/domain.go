@@ -12,12 +12,12 @@ type (
 
 	// User represents the model of a user
 	User struct {
-		UID       bson.ObjectId `bson:"_id" json:"id"`
+		UID       bson.ObjectId `bson:"_id,omitempty" json:"id"`
 		UserName  string        `bson:"username" json:"username"`
-		Password  string        `bson:"password" json:"password"`
-		Gender    string        `bson:"gender" json:"gender"`
-		FirstName string        `bson:"firstname" json:"firstname"`
-		LastName  string        `bson:"lastname" json:"lastname"`
+		Password  string        `bson:"password,omitempty" json:"password"`
+		Gender    string        `bson:"gender,omitempty" json:"gender"`
+		FirstName string        `bson:"firstname,omitempty" json:"firstname"`
+		LastName  string        `bson:"lastname,omitempty" json:"lastname"`
 	}
 
 	// EmailAddress represents email addresses
@@ -98,10 +98,9 @@ func (u *User) GetPassword() []byte {
 	return nil
 }
 
-// IsCredentialsVerified matches given password with user's password
-func (u *User) IsCredentialsVerified(password string) bool {
-	err := bcrypt.CompareHashAndPassword([]byte(u.Password), []byte(password))
-
+// IsCredentialsVerified ...
+func (u *User) IsCredentialsVerified(password, hash string) bool {
+	err := bcrypt.CompareHashAndPassword([]byte(hash), []byte(password))
 	return err == nil
 }
 

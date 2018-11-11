@@ -92,9 +92,9 @@ func login(w http.ResponseWriter, r *http.Request) {
 			log.Println(err)
 			http.Error(w, "Login failed!", http.StatusUnauthorized)
 		}
+		fmt.Println("got far son::", json)
 
 		w.Write(json)
-		fmt.Println("got far son::", tokenString)
 	} else {
 		http.Error(w, "Login failed!", http.StatusUnauthorized)
 	}

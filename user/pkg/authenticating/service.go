@@ -4,8 +4,9 @@ import "errors"
 
 // Service ...
 type Service interface {
-	Login(string, string) (interface{}, error)
+	Login(string, string) (map[string]interface{}, error)
 	SignUp(string, string, string, string) (interface{}, error)
+	Profile(string, string) ([]byte, error)
 }
 
 // ErrDuplicate ...
@@ -14,13 +15,15 @@ var ErrDuplicate = errors.New("user already exists")
 // Repository provides access to user repository.
 type Repository interface {
 	// Login returns a token if user is in storage.
-	Login(string, string) (interface{}, error)
+	Login(string, string) (map[string]interface{}, error)
 	// SignUp inserts a new user and returns a token if user is in storage.
 	SignUp(string, string, string, string) (interface{}, error)
+	// Profile ...
+	Profile(string, string) ([]byte, error)
 }
 
 type service struct {
-	uSR Repository
+	usr Repository
 }
 
 // NewService ...
@@ -29,11 +32,16 @@ func NewService(r Repository) Service {
 }
 
 // Login ...
-func (s *service) Login(username string, password string) (interface{}, error) {
-	return s.uSR.Login(username, password)
+func (s *service) Login(username string, password string) (map[string]interface{}, error) {
+	return s.usr.Login(username, password)
 }
 
 // SignUp ...
 func (s *service) SignUp(username string, password string, firstname string, lastname string) (interface{}, error) {
-	return s.uSR.SignUp(username, password, firstname, lastname)
+	return s.usr.SignUp(username, password, firstname, lastname)
+}
+
+// SignUp ...
+func (s *service) Profile(token string, UUID string) ([]byte, error) {
+	return s.usr.Profile(token, UUID)
 }
