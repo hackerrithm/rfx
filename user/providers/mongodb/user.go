@@ -1,14 +1,17 @@
-package mongo
+package mongodb
 
 import (
 	"encoding/json"
 	"log"
 	"time"
 
-	jwt "github.com/dgrijalva/jwt-go"
-	"github.com/hackerrithm/longterm/rfx/user/pkg/authenticating"
-	mgo "gopkg.in/mgo.v2"
+	"golang.org/x/net/context"
+	"gopkg.in/mgo.v2"
 	"gopkg.in/mgo.v2/bson"
+
+	jwt "github.com/dgrijalva/jwt-go"
+	"github.com/hackerrithm/longterm/rfx/user/domain"
+	"github.com/hackerrithm/longterm/rfx/user/engine"
 )
 
 const (
@@ -16,29 +19,7 @@ const (
 	SECRET = "12This98Is34A76String56Used65As78Secret01"
 )
 
-// Storage ...
-type Storage struct {
-	Database string
-}
-
-var db *mgo.Database
-
 var returnObjectMap map[string]interface{}
-
-const (
-	// COLLECTION ...
-	COLLECTION = "user"
-)
-
-// NewStorage ...
-func NewStorage() (*Storage, error) {
-	session, err := mgo.Dial("mongodb://localhost/test1")
-	if err != nil {
-		log.Fatal(err)
-	}
-	db = session.DB("test1")
-	return &Storage{db.Name}, err
-}
 
 // TODO: to be implemented
 
@@ -50,21 +31,40 @@ type JWTData struct {
 	CustomClaims map[string]string `json:"custom,omitempty"`
 }
 
-// SignUp ...
-func (s *Storage) SignUp(username string, password string, firstname string, lastname string) (interface{}, error) {
+type (
+	userRepository struct {
+		session *mgo.Session
+	}
+)
+
+var (
+	userCollection = "user"
+)
+
+func newUserRepository(session *mgo.Session) engine.UserRepository {
+	return &userRepository{session}
+}
+
+func (r userRepository) Put(c context.Context, u *domain.User) map[string]interface{} {
+	s := r.session.Clone()
+	defer s.Close()
+
 	returnObjectMap = make(map[string]interface{})
-	var user authenticating.User
+	var user domain.User
 	var result []byte
 
-	user.UserName = username
-	user.SetPassword(password)
-	user.FirstName = firstname
-	user.LastName = lastname
+	user.UserName = u.UserName
+	user.SetPassword(u.Password)
+	user.FirstName = u.FirstName
+	user.LastName = u.LastName
 
-	err := db.C(COLLECTION).Insert(&user)
-	if err != nil {
-		log.Printf("%s", err)
+	col := s.DB("test1").C(userCollection)
+	if u.ID == 0 {
+		u.ID = getNextSequence(s, userCollection)
 	}
+
+	// col.Upsert(bson.M{"_id": u.ID}, u)
+	col.Insert(&user)
 
 	claims := JWTData{
 		StandardClaims: jwt.StandardClaims{
@@ -89,28 +89,40 @@ func (s *Storage) SignUp(username string, password string, firstname string, las
 
 	returnObjectMap["token"] = result
 
-	return returnObjectMap, nil
-
+	return returnObjectMap
 }
 
-// Login ...
-func (s *Storage) Login(username string, password string) (map[string]interface{}, error) {
-	returnObjectMap = make(map[string]interface{})
-	var user authenticating.User
-	user.UserName = username
+func (r userRepository) List(c context.Context, query *engine.Query) []*domain.User {
+	s := r.session.Clone()
+	defer s.Close()
 
-	err := db.C(COLLECTION).Find(bson.M{"username": user.UserName}).One(&user)
+	col := s.DB("test1").C(userCollection)
+	g := []*domain.User{}
+	q := translateQuery(col, query)
+	q.All(&g)
+
+	return g
+}
+
+func (r userRepository) Read(c context.Context, username, password string) map[string]interface{} {
+	s := r.session.Clone()
+	defer s.Close()
+
+	returnObjectMap = make(map[string]interface{})
+	var user *domain.User
+
+	err := s.DB("test1").C(userCollection).Find(bson.M{"username": username}).One(&user)
 
 	if err != nil {
-		return nil, err
+		return nil
 	}
 
 	if !user.IsCredentialsVerified(password, user.Password) {
 		log.Println("error")
-		return nil, err
+		return nil
 	}
 
-	var userUID = user.UID.Hex()
+	var userUID = user.ID
 
 	claims := JWTData{
 		StandardClaims: jwt.StandardClaims{
@@ -118,7 +130,7 @@ func (s *Storage) Login(username string, password string) (map[string]interface{
 		},
 
 		CustomClaims: map[string]string{
-			"userid": userUID,
+			"userid": string(userUID),
 		},
 	}
 
@@ -131,7 +143,7 @@ func (s *Storage) Login(username string, password string) (map[string]interface{
 	returnObjectMap["token"] = tokenString
 	returnObjectMap["userUID"] = userUID
 
-	return returnObjectMap, nil
+	return returnObjectMap
 }
 
 func getByteToken(token *jwt.Token) (interface{}, error) {
@@ -150,7 +162,7 @@ func parseWithClaims(jwtToken string) (*jwt.Token, error) {
 }
 
 // Profile ...
-func (s *Storage) Profile(jwtToken string, UUID string) ([]byte, error) {
+func (r userRepository) Profile(c context.Context, jwtToken string, ID string) []byte {
 	claims, err := parseWithClaims(jwtToken)
 	if err != nil {
 		log.Println(err)
@@ -161,27 +173,20 @@ func (s *Storage) Profile(jwtToken string, UUID string) ([]byte, error) {
 	userID := data.CustomClaims["userid"]
 	log.Println("claim ", userID)
 
-	// fetch some data based on the userID and then send that data back to the user in JSON format
-	user, err := GetUser(UUID)
+	s := r.session.Clone()
+	defer s.Close()
 
+	var user domain.User
+	err = s.DB("test1").C(userCollection).FindId(bson.ObjectIdHex(ID)).One(&user)
 	if err != nil {
-		return nil, err
-	}
-
-	return user, nil
-}
-
-// GetUser ...
-func GetUser(ID string) ([]byte, error) {
-	var user authenticating.User
-	err := db.C(COLLECTION).FindId(bson.ObjectIdHex(ID)).One(&user)
-	if err != nil {
-		return nil, err
+		return nil
 	}
 
 	json, err := json.Marshal(user)
 	if err != nil {
-		return nil, err
+		log.Println(err)
+		return nil
 	}
-	return []byte(json), err
+
+	return []byte(json)
 }
