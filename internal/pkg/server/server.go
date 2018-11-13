@@ -42,6 +42,7 @@ func StartServer() {
 	httpType := REST
 
 	var authenticater authenticating.Service
+	// var taskService engine.Task
 
 	switch storageType {
 	// case Memory:
@@ -58,6 +59,7 @@ func StartServer() {
 		s, _ := mongo.NewStorage()
 
 		authenticater = authenticating.NewService(s)
+		// taskService = engine
 	}
 
 	switch httpType {

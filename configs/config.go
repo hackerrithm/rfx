@@ -10,4 +10,6 @@ type Configuration struct {
 	ConnectionString string
 	// Address is the address we will use in our app
 	Address string
+	// MongoURL is the connection string for a mongodb database
+	MongoURL string
 }

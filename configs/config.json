@@ -1,5 +1,6 @@
 {
     "Port": "7003",
     "Static_Variable": "static",
-    "Address": "127.0.0.1"
+    "Address": "127.0.0.1",
+    "MongoURL": "mongodb://localhost/clean"
 }

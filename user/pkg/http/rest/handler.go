@@ -77,23 +77,19 @@ func profile(s authenticating.Service) func(w http.ResponseWriter, r *http.Reque
 	return func(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 		authToken := r.Header.Get("Authorization")
 		authArr := strings.Split(authToken, " ")
-		UUID := r.URL.Query()["uuid"] //r.URL.Query().Get("uuid")
-		if UUID[0] != "" {
-			if len(authArr) != 2 {
-				log.Println("Authentication header is invalid: " + authToken)
-				http.Error(w, "Request failed!", http.StatusUnauthorized)
-			}
-
-			jwtToken := authArr[1]
-			jsonData, err := s.Profile(jwtToken, UUID[0])
-			if err != nil {
-				log.Println(err)
-				http.Error(w, "Request failed!", http.StatusUnauthorized)
-			}
-
-			w.Write(jsonData)
-		} else {
-			log.Println("request error")
+		UUID := queryValue("uuid", r)
+		if len(authArr) != 2 {
+			log.Println("Authentication header is invalid: " + authToken)
+			http.Error(w, "Request failed!", http.StatusUnauthorized)
 		}
+
+		jwtToken := authArr[1]
+		jsonData, err := s.Profile(jwtToken, UUID)
+		if err != nil {
+			log.Println(err)
+			http.Error(w, "Request failed!", http.StatusUnauthorized)
+		}
+		w.Header().Set("Content-Type", "application/json")
+		w.Write(jsonData)
 	}
 }

@@ -15,9 +15,9 @@ type (
 		UID       bson.ObjectId `bson:"_id,omitempty" json:"id"`
 		UserName  string        `bson:"username" json:"username"`
 		Password  string        `bson:"password,omitempty" json:"password"`
-		Gender    string        `bson:"gender,omitempty" json:"gender"`
 		FirstName string        `bson:"firstname,omitempty" json:"firstname"`
 		LastName  string        `bson:"lastname,omitempty" json:"lastname"`
+		Gender    string        `bson:"gender,omitempty" json:"gender"`
 	}
 
 	// EmailAddress represents email addresses
@@ -83,6 +83,17 @@ type (
 
 var userContextKey contextKey = "user"
 
+// NewUser creates a new User!
+func NewUser(userName, password, firstname, lastname, gender string) *User {
+	return &User{
+		UserName:  userName,
+		Password:  password,
+		FirstName: firstname,
+		LastName:  lastname,
+		Gender:    gender,
+	}
+}
+
 // SetPassword sets user's password
 func (u *User) SetPassword(p string) {
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(p), bcrypt.DefaultCost)
@@ -91,11 +102,6 @@ func (u *User) SetPassword(p string) {
 	}
 
 	u.Password = string(hashedPassword)
-}
-
-// GetPassword gets the password
-func (u *User) GetPassword() []byte {
-	return nil
 }
 
 // IsCredentialsVerified ...

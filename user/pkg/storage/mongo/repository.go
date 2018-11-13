@@ -118,7 +118,7 @@ func (s *Storage) Login(username string, password string) (map[string]interface{
 		},
 
 		CustomClaims: map[string]string{
-			"userid": "u1",
+			"userid": userUID,
 		},
 	}
 
