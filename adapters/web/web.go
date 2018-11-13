@@ -5,7 +5,7 @@ import (
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
-	usr "github.com/hackerrithm/longterm/rfx/usr/engine"
+	usr "github.com/hackerrithm/longterm/rfx/user/engine"
 )
 
 func init() {

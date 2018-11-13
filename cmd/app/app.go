@@ -6,8 +6,8 @@ import (
 	"net/http"
 
 	"github.com/hackerrithm/longterm/rfx/adapters/web"
-	user "github.com/hackerrithm/longterm/rfx/usr/engine"
-	userProvider "github.com/hackerrithm/longterm/rfx/usr/providers/mongodb"
+	user "github.com/hackerrithm/longterm/rfx/user/engine"
+	userProvider "github.com/hackerrithm/longterm/rfx/user/providers/mongodb"
 )
 
 // when running in traditional or 'standalone' mode

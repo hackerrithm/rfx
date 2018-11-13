@@ -11,7 +11,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 
-	"github.com/hackerrithm/longterm/rfx/usr/engine"
+	"github.com/hackerrithm/longterm/rfx/user/engine"
 )
 
 type (
