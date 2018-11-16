@@ -2,5 +2,6 @@
     "Port": "7003",
     "Static_Variable": "static",
     "Address": "127.0.0.1",
-    "MongoURL": "mongodb://localhost/clean"
+    "MongoURL": "mongodb://localhost/clean",
+    "SECRET": "12This98Is34A76String56Used65As78Secret01"
 }

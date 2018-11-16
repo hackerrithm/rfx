@@ -14,12 +14,16 @@ type (
 	// which only involves a storage factory instance
 	engineFactory struct {
 		StorageFactory
+		// SecurityFactory
 	}
 )
 
 // NewEngine creates a new engine factory that will
 // make use of the passed in StorageFactory for any
 // data persistence needs.
-func NewEngine(s StorageFactory) EngineFactory {
-	return &engineFactory{s}
+func NewEngine(s StorageFactory /*, jwt SecurityFactory*/) EngineFactory {
+	return &engineFactory{
+		s,
+		// jwt,
+	}
 }

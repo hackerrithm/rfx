@@ -5,7 +5,7 @@ package main
 import (
 	"net/http"
 
-	"github.com/hackerrithm/longterm/rfx/adapters/web"
+	"github.com/hackerrithm/longterm/rfx/user/adapters/web"
 	user "github.com/hackerrithm/longterm/rfx/user/engine"
 	userProvider "github.com/hackerrithm/longterm/rfx/user/providers/mongodb"
 )

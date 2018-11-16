@@ -12,4 +12,6 @@ type Configuration struct {
 	Address string
 	// MongoURL is the connection string for a mongodb database
 	MongoURL string
+	// SECRET ...
+	SECRET string
 }
