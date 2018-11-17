@@ -10,6 +10,9 @@ type (
 		// Add is the add-a-user use-case
 		Add(c context.Context, r *AddUserRequest) *AddUserResponse
 
+		// Update is the update-a-user use-case
+		Update(c context.Context, r *AddUserRequest) *UpdateUserResponse
+
 		// List is the list-the-users use-case
 		List(c context.Context, r *ListUsersRequest) *ListUsersResponse
 
@@ -18,11 +21,18 @@ type (
 
 		// Profile is the getting profile details use-case
 		Profile(c context.Context, r *ProfileRequest) *ProfileResponse
+
+		//GenerateToken ...
+		GenerateToken() (map[string]interface{}, error)
+
+		// ParseToken ...
+		ParseToken(token string) (map[string]interface{}, error)
 	}
 
 	// user implementation
 	user struct {
 		repository UserRepository
+		jwt        JWTSignParser
 	}
 )
 
@@ -32,5 +42,6 @@ type (
 func (f *engineFactory) NewUser() User {
 	return &user{
 		repository: f.NewUserRepository(),
+		jwt:        f.JWTSignParser,
 	}
 }

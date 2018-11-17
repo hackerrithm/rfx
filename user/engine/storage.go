@@ -11,18 +11,21 @@ type (
 	// data storage provider needs to implement to get
 	// and store users
 	UserRepository interface {
+		// Insert adds a new User to the datastore
+		Insert(c context.Context, user *domain.User) string
+
 		// Put adds a new User to the datastore
-		Put(c context.Context, user *domain.User) map[string]interface{}
+		Put(c context.Context, user *domain.User) string
 
 		// List returns existing users matching the
 		// query provided
 		List(c context.Context, query *Query) []*domain.User
 
 		// Read returns ...
-		Read(c context.Context, username, password string) map[string]interface{}
+		Read(c context.Context, username, password string) *domain.User
 
 		// Profile returns user details on a specific profile
-		Profile(c context.Context, jwtToken, ID string) []byte
+		Profile(c context.Context, jwtToken, ID string) *domain.User
 	}
 
 	// StorageFactory is the interface that a storage

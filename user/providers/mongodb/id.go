@@ -1,6 +1,8 @@
 package mongodb
 
 import (
+	"log"
+
 	"gopkg.in/mgo.v2"
 	"gopkg.in/mgo.v2/bson"
 )
@@ -26,6 +28,7 @@ func getNextSequence(s *mgo.Session, name string) int64 {
 		ReturnNew: true,
 	}
 	id := new(ID)
+	log.Println("this is: ", id)
 	c.Find(bson.M{"_id": name}).Apply(change, id)
 	return id.Next
 }

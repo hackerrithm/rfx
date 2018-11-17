@@ -18,7 +18,7 @@ type (
 	// so we add the JSON serialization tags but we
 	// could use DTO specific structs for that
 	User struct {
-		ID        int64     `json:"id"`
+		ID        string    `json:"_id"`
 		UserName  string    `json:"username"`
 		Password  string    `json:"paswword"`
 		FirstName string    `json:"firstname"`

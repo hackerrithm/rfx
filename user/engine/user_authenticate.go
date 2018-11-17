@@ -1,7 +1,12 @@
 package engine
 
 import (
+	"github.com/hackerrithm/longterm/rfx/user/domain"
 	"golang.org/x/net/context"
+)
+
+const (
+	secretKey = "12This98Is34A76String56Used65As78Secret01"
 )
 
 type (
@@ -13,7 +18,7 @@ type (
 
 	// AuthenticatUserResponse ...
 	AuthenticatUserResponse struct {
-		Token map[string]interface{}
+		User *domain.User
 	}
 
 	// ProfileRequest ...
@@ -24,25 +29,30 @@ type (
 
 	// ProfileResponse ...
 	ProfileResponse struct {
-		Payload []byte
+		Payload *domain.User
 	}
 )
 
 func (u *user) Read(c context.Context, r *AuthenticateUserRequest) *AuthenticatUserResponse {
-	// this is where all our app logic would go - the
-	// rules that apply to adding a user whether it
-	// is being done via the web UI, a console app, or
-	// whatever the internet has just been added to ...
-	// user := domain.NewUser(r.UserName, r.Password, r.FirstName, r.LastName, r.Gender)
-
 	return &AuthenticatUserResponse{
 		u.repository.Read(c, r.UserName, r.Password),
 	}
 }
 
 func (u *user) Profile(c context.Context, r *ProfileRequest) *ProfileResponse {
-
 	return &ProfileResponse{
 		u.repository.Profile(c, r.Token, r.ID),
 	}
+}
+
+func (u *user) GenerateToken() (map[string]interface{}, error) {
+	claims := map[string]interface{}{
+		"userid": "u1",
+	}
+
+	return u.jwt.Sign(claims, secretKey)
+}
+
+func (u *user) ParseToken(token string) (map[string]interface{}, error) {
+	return u.jwt.Parse(token, secretKey)
 }
