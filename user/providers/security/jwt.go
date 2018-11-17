@@ -1,14 +1,10 @@
 package security
 
 import (
-	"encoding/json"
-	"fmt"
 	"log"
-	"os"
 	"time"
 
 	jwt "github.com/dgrijalva/jwt-go"
-	cfg "github.com/hackerrithm/longterm/rfx/configs"
 )
 
 // // NewJWT ...
@@ -28,24 +24,11 @@ type JWTData struct {
 	CustomClaims map[string]string `json:"custom,omitempty"`
 }
 
-func getSecret() (string, error) {
-	file, _ := os.Open("../configs/config.json")
-	defer file.Close()
-	decoder := json.NewDecoder(file)
-	configuration := cfg.Configuration{}
-	err := decoder.Decode(&configuration)
-	if err != nil {
-		fmt.Println("error:", err)
-		return "", err
-	}
-	return configuration.SECRET, nil
-}
+const (
+	secretKey = "12This98Is34A76String56Used65As78Secret01"
+)
 
 func getByteToken(token *jwt.Token) (interface{}, error) {
-	secretKey, err := getSecret()
-	if err != nil {
-		return nil, err
-	}
 	if jwt.SigningMethodHS256 != token.Method {
 		log.Println("Invalid signing algorithm")
 	}
@@ -53,7 +36,7 @@ func getByteToken(token *jwt.Token) (interface{}, error) {
 	return []byte(secretKey), nil
 }
 
-func ParseWithClaims(jwtToken string) (*jwt.Token, error) {
+func parseWithClaims(jwtToken string) (*jwt.Token, error) {
 	cl, err := jwt.ParseWithClaims(jwtToken, &JWTData{}, getByteToken)
 	if err != nil {
 		log.Println("error in parseWithClaims")
@@ -62,9 +45,9 @@ func ParseWithClaims(jwtToken string) (*jwt.Token, error) {
 
 }
 
+// Sign ...
 func Sign( /*claims map[string]interface{}, secret string*/ ) (map[string]interface{}, error) {
 	returnObjectMap = make(map[string]interface{})
-	var result []byte
 	claims := JWTData{
 		StandardClaims: jwt.StandardClaims{
 			ExpiresAt: time.Now().Add(time.Hour).Unix(),
@@ -75,51 +58,28 @@ func Sign( /*claims map[string]interface{}, secret string*/ ) (map[string]interf
 		},
 	}
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-	secretKey, err := getSecret()
-	if err != nil {
-		return nil, err
-	}
 	tokenString, err := token.SignedString([]byte(secretKey))
 	if err != nil {
 		log.Println("StatusUnauthorized ", err)
 	}
 
-	result, err = json.Marshal(struct {
-		Token string `json:"token"`
-	}{
-		tokenString,
-	})
-
-	returnObjectMap["token"] = result
+	returnObjectMap["token"] = tokenString
 
 	return returnObjectMap, nil
 }
 
-func Parse( /*tokenStr string, secret string, */ userUID int64) (map[string]interface{}, error) {
-	returnObjectMap = make(map[string]interface{})
-	claims := JWTData{
-		StandardClaims: jwt.StandardClaims{
-			ExpiresAt: time.Now().Add(time.Hour).Unix(),
-		},
-
-		CustomClaims: map[string]string{
-			"userid": string(userUID),
-		},
-	}
-
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-	secretKey, err := getSecret()
+// Parse ..
+func Parse(tokenStr string /*secret string, , userUID int64*/) (string, error) {
+	claims, err := parseWithClaims(tokenStr)
 	if err != nil {
-		return nil, err
-	}
-	tokenString, err := token.SignedString([]byte(secretKey))
-	if err != nil {
-		log.Println("StatusUnauthorized ", err)
-		return nil, err
+		log.Println(err)
+		return "", err
 	}
 
-	returnObjectMap["token"] = tokenString
-	returnObjectMap["userUID"] = userUID
+	data := claims.Claims.(*JWTData)
 
-	return returnObjectMap, nil
+	userID := data.CustomClaims["userid"]
+	log.Println("claim ", userID)
+
+	return userID, nil
 }

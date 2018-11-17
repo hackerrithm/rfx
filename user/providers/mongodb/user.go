@@ -83,9 +83,9 @@ func (r userRepository) Read(c context.Context, username, password string) map[s
 		return nil
 	}
 
-	var userUID = user.ID
+	// var userUID = user.ID
 
-	returnObjectMap, err := security.Parse(userUID)
+	returnObjectMap, err := security.Sign()
 	if err != nil {
 		log.Println(err)
 	}
@@ -95,15 +95,12 @@ func (r userRepository) Read(c context.Context, username, password string) map[s
 
 // Profile ...
 func (r userRepository) Profile(c context.Context, jwtToken string, ID string) []byte {
-	claims, err := security.ParseWithClaims(jwtToken)
+
+	result, err := security.Parse(jwtToken)
 	if err != nil {
-		log.Println(err)
+		log.Println("err: ", err)
 	}
-
-	data := claims.Claims.(*security.JWTData)
-
-	userID := data.CustomClaims["userid"]
-	log.Println("claim ", userID)
+	log.Println("result: ", result)
 
 	s := r.session.Clone()
 	defer s.Close()
