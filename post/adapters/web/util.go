@@ -1,13 +1,18 @@
 package web
 
 import (
+	"crypto/sha1"
 	"encoding/json"
 	"fmt"
 	"io"
 	"net/http"
+	"os"
+	"path/filepath"
 	"strconv"
+	"strings"
 
 	"github.com/gorilla/mux"
+	uuid "github.com/satori/go.uuid"
 )
 
 type response struct {
@@ -56,4 +61,64 @@ func urlParamMust(k string, r *http.Request) string {
 		panic(fmt.Sprintf("there isn't url param with this key: %s", k))
 	}
 	return v
+}
+
+func getCookie(w http.ResponseWriter, req *http.Request) *http.Cookie {
+	c, err := req.Cookie("session")
+	if err != nil {
+		sID, _ := uuid.NewV4()
+		c = &http.Cookie{
+			Name:  "session",
+			Value: sID.String(),
+		}
+		http.SetCookie(w, c)
+	}
+	return c
+}
+
+// takes in a file name now also
+func appendValue(w http.ResponseWriter, c *http.Cookie, fname string) *http.Cookie {
+	s := c.Value
+	if !strings.Contains(s, fname) {
+		s += "|" + fname
+	}
+	c.Value = s
+	http.SetCookie(w, c)
+	return c
+}
+
+// FileUpload ...
+func FileUpload(w http.ResponseWriter, r *http.Request) (string, error) {
+	// cookie := getCookie(w, r)
+
+	mf, fh, err := r.FormFile("contentPhoto")
+	if err != nil {
+		fmt.Println(err)
+	}
+	defer mf.Close()
+	// create sha for file name
+	ext := strings.Split(fh.Filename, ".")[1]
+	h := sha1.New()
+	io.Copy(h, mf)
+	fname := fmt.Sprintf("%x", h.Sum(nil)) + "." + ext
+	// create new file
+	wd, err := os.Getwd()
+	if err != nil {
+		fmt.Println(err)
+	}
+	path := filepath.Join(wd+"../../../", "assets", "photos", fname)
+	nf, err := os.Create(path)
+	if err != nil {
+		fmt.Println(err)
+	}
+	defer nf.Close()
+	// copy
+	mf.Seek(0, 0)
+	io.Copy(nf, mf)
+	// add filename to this user's cookie
+	// cookie = appendValue(w, cookie, fname)
+	// xs := strings.Split(cookie.Value, "|")
+	fmt.Println(fname, " :: fname")
+
+	return fname, nil
 }

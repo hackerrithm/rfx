@@ -23,7 +23,7 @@ type (
 )
 
 func (p *post) Add(c context.Context, r *AddPostRequest) *AddPostResponse {
-	Post := domain.NewPost(r.Author, r.Topic, r.Category, r.ContentPhoto, r.ContentText)
+	Post := domain.NewPost(r.Author, r.Topic, r.Category, r.ContentText, r.ContentPhoto)
 	return &AddPostResponse{
 		ID: p.repository.Insert(c, Post),
 	}

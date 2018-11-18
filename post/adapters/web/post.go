@@ -62,24 +62,21 @@ func (p post) list(c *gin.Context) {
 func (p post) add(c *gin.Context) {
 	ctx := getContext(c)
 
-	body, err := ioutil.ReadAll(c.Request.Body)
+	fileName, err := FileUpload(c.Writer, c.Request)
 	if err != nil {
-		log.Println(err)
+		log.Println("error bya")
 	}
 
-	var postData map[string]string
-	json.Unmarshal(body, &postData)
-
 	req := &engine.AddPostRequest{
-		Author:       postData["author"],
-		Topic:        postData["topic"],
-		ContentText:  postData["contentText"],
-		ContentPhoto: postData["contentPhoto"],
-		Category:     postData["category"],
+		Author:       c.Request.FormValue("author"),
+		Topic:        c.Request.FormValue("topic"),
+		Category:     c.Request.FormValue("category"),
+		ContentText:  c.Request.FormValue("contentText"),
+		ContentPhoto: string(fileName),
 	}
 
 	repo := p.Add(ctx, req)
-	fmt.Println(repo)
+
 	// TODO: token stuff
 
 	// res, err := u.GenerateToken()
