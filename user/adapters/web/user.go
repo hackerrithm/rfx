@@ -28,8 +28,8 @@ type (
 // 	CustomClaims map[string]string `json:"custom,omitempty"`
 // }
 
-// wire up the greetings routes
-func initUsers(e *gin.Engine, f engine.EngineFactory, endpoint string) {
+// InitUsers wire up the user routes
+func InitUsers(e *gin.Engine, f engine.EngineFactory, endpoint string) {
 	user := &user{f.NewUser()}
 	u := e.Group(endpoint)
 	{

@@ -5,6 +5,10 @@ import (
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
+
+	pstWeb "github.com/hackerrithm/longterm/rfx/post/adapters/web"
+	pst "github.com/hackerrithm/longterm/rfx/post/engine"
+	usrWeb "github.com/hackerrithm/longterm/rfx/user/adapters/web"
 	usr "github.com/hackerrithm/longterm/rfx/user/engine"
 )
 
@@ -22,7 +26,7 @@ func init() {
 // Go web routers / frameworks (Gin, Echo, Goji etc...)
 // or just stick with the standard framework. Changing
 // should be far less costly.
-func NewWebAdapter(f1 usr.EngineFactory, log bool) http.Handler {
+func NewWebAdapter(f1 usr.EngineFactory, f2 pst.EngineFactory, log bool) http.Handler {
 	var e *gin.Engine
 	if log {
 		e = gin.Default()
@@ -34,7 +38,8 @@ func NewWebAdapter(f1 usr.EngineFactory, log bool) http.Handler {
 
 	e.LoadHTMLGlob("templates/*")
 
-	initUsers(e, f1, "/")
+	usrWeb.InitUsers(e, f1, "/")
+	pstWeb.InitPosts(e, f2, "/")
 
 	return e
 }

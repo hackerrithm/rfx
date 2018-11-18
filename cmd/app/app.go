@@ -5,9 +5,13 @@ package main
 import (
 	"net/http"
 
-	"github.com/hackerrithm/longterm/rfx/user/adapters/web"
+	"github.com/hackerrithm/longterm/rfx/adapters/web"
+	post "github.com/hackerrithm/longterm/rfx/post/engine"
+	postProvider "github.com/hackerrithm/longterm/rfx/post/providers/mongodb"
 	user "github.com/hackerrithm/longterm/rfx/user/engine"
+
 	userProvider "github.com/hackerrithm/longterm/rfx/user/providers/mongodb"
+
 	"github.com/hackerrithm/longterm/rfx/user/providers/security"
 )
 
@@ -16,10 +20,11 @@ import (
 // and start the webserver running ourselves.
 func main() {
 	// s1 := greeterProvider.NewStorage("mongodb://localhost/test1")
-	s1 := userProvider.NewStorage("mongodb://localhost/test1")
-	s2 := security.NewJWT()
+	up := userProvider.NewStorage("mongodb://localhost/test1")
+	pp := postProvider.NewStorage("mongodb://localhost/test1")
+	sec := security.NewJWT()
 
-	// eGreeter := greeter.NewEngine(s1)
-	eUser := user.NewEngine(s1, s2)
-	http.ListenAndServe(":7003", web.NewWebAdapter(eUser, true))
+	eUser := user.NewEngine(up, sec)
+	ePost := post.NewEngine(pp)
+	http.ListenAndServe(":7003", web.NewWebAdapter(eUser, ePost, true))
 }
