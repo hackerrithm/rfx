@@ -1,10 +1,13 @@
 package web
 
 import (
+	"crypto/rand"
 	"crypto/sha1"
 	"encoding/json"
 	"fmt"
 	"io"
+	"io/ioutil"
+	"mime/multipart"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -87,38 +90,84 @@ func appendValue(w http.ResponseWriter, c *http.Cookie, fname string) *http.Cook
 	return c
 }
 
+const maxUploadSize = 20000 * 1024
+const uploadPath = ".../../../assets"
+
+func renderError(w http.ResponseWriter, message string, statusCode int) {
+	w.WriteHeader(http.StatusBadRequest)
+	w.Write([]byte(message))
+}
+
+func randToken(len int, file multipart.File) string {
+	h := sha1.New()
+	io.Copy(h, file)
+	b := make([]byte, len)
+	rand.Read(b)
+	ve := h.Sum(nil)
+	val := append(ve[:], b[:]...)
+	return fmt.Sprintf("%x", val)
+}
+
 // FileUpload ...
 func FileUpload(w http.ResponseWriter, r *http.Request) (string, error) {
-	// cookie := getCookie(w, r)
 
-	mf, fh, err := r.FormFile("contentPhoto")
-	if err != nil {
-		fmt.Println(err)
+	// validate file size
+	r.Body = http.MaxBytesReader(w, r.Body, maxUploadSize)
+	if err := r.ParseMultipartForm(maxUploadSize); err != nil {
+		renderError(w, "FILE_TOO_BIG", http.StatusBadRequest)
+		return "", nil
 	}
-	defer mf.Close()
-	// create sha for file name
+
+	// parse and validate file and post parameters
+	fileType := r.PostFormValue("type")
+	file, fh, err := r.FormFile("contentPhoto")
+	if err != nil {
+		renderError(w, "INVALID_FILE", http.StatusBadRequest)
+		return "", nil
+	}
+	defer file.Close()
+	fileBytes, err := ioutil.ReadAll(file)
+	if err != nil {
+		renderError(w, "INVALID_FILE", http.StatusBadRequest)
+		return "", nil
+	}
+
 	ext := strings.Split(fh.Filename, ".")[1]
-	h := sha1.New()
-	io.Copy(h, mf)
-	fname := fmt.Sprintf("%x", h.Sum(nil)) + "." + ext
-	// create new file
+
+	// check file type, detectcontenttype only needs the first 512 bytes
+	filetype := http.DetectContentType(fileBytes)
+	fmt.Println("filetype: ", ext)
+	switch filetype {
+	case "image/jpeg", "image/jpg":
+	case "image/gif", "image/png":
+	case "application/pdf":
+		break
+	default:
+		renderError(w, "INVALID_FILE_TYPE", http.StatusBadRequest)
+		return "", nil
+	}
+	fileName := randToken(12, file)
+
 	wd, err := os.Getwd()
 	if err != nil {
 		fmt.Println(err)
 	}
-	path := filepath.Join(wd+"../../../", "assets", "photos", fname)
-	nf, err := os.Create(path)
-	if err != nil {
-		fmt.Println(err)
-	}
-	defer nf.Close()
-	// copy
-	mf.Seek(0, 0)
-	io.Copy(nf, mf)
-	// add filename to this user's cookie
-	// cookie = appendValue(w, cookie, fname)
-	// xs := strings.Split(cookie.Value, "|")
-	fmt.Println(fname, " :: fname")
+	fileName = fileName + "." + ext
+	newPath := filepath.Join(wd+uploadPath, "photos", fileName)
+	fmt.Printf("FileType: %s, File: %s\n", fileType, newPath)
 
-	return fname, nil
+	// write file
+	newFile, err := os.Create(newPath)
+	if err != nil {
+		renderError(w, "CANT_WRITE_FILE", http.StatusInternalServerError)
+		return "", nil
+	}
+	defer newFile.Close() // idempotent, okay to call twice
+	if _, err := newFile.Write(fileBytes); err != nil || newFile.Close() != nil {
+		renderError(w, "CANT_WRITE_FILE", http.StatusInternalServerError)
+		return "", nil
+	}
+	w.Write([]byte("SUCCESS"))
+
+	return fileName, nil
 }

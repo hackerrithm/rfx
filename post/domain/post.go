@@ -1,8 +1,12 @@
 package domain
 
-import "time"
+import (
+	"time"
 
-var postContextKey contextKey = "Post"
+	"gopkg.in/mgo.v2/bson"
+)
+
+var postContextKey contextKey = "post"
 
 type (
 	contextKey string
@@ -13,13 +17,13 @@ type (
 	// so we add the JSON serialization tags but we
 	// could use DTO specific structs for that
 	Post struct {
-		ID           string    `json:"_id"`
-		Author       string    `json:"author"`
-		Topic        string    `json:"topic"`
-		Category     string    `json:"category"`
-		ContentText  string    `json:"contentText"`
-		ContentPhoto string    `json:"contentPhoto"`
-		Date         time.Time `json:"timestamp"`
+		ID           bson.ObjectId `json:"id" bson:"_id,omitempty"`
+		Author       string        `json:"author" bson:"author"`
+		Topic        string        `json:"topic" bson:"topic"`
+		Category     string        `json:"category" bson:"category"`
+		ContentText  string        `json:"contentText" bson:"content_text"`
+		ContentPhoto string        `json:"contentPhoto" bson:"content_photo"`
+		Date         time.Time     `json:"timestamp" bson:"timestamp"`
 	}
 )
 

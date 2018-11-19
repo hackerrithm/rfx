@@ -4,6 +4,8 @@ import (
 	"context"
 	"time"
 
+	"gopkg.in/mgo.v2/bson"
+
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -18,13 +20,13 @@ type (
 	// so we add the JSON serialization tags but we
 	// could use DTO specific structs for that
 	User struct {
-		ID        string    `json:"_id"`
-		UserName  string    `json:"username"`
-		Password  string    `json:"paswword"`
-		FirstName string    `json:"firstname"`
-		LastName  string    `json:"lastname"`
-		Gender    string    `json:"gender"`
-		Date      time.Time `json:"timestamp"`
+		ID        bson.ObjectId `json:"id" bson:"_id,omitempty"`
+		UserName  string        `json:"username"`
+		Password  string        `json:"paswword"`
+		FirstName string        `json:"firstname"`
+		LastName  string        `json:"lastname"`
+		Gender    string        `json:"gender"`
+		Date      time.Time     `json:"timestamp"`
 	}
 )
 

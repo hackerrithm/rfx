@@ -1,9 +1,7 @@
 package web
 
 import (
-	"encoding/json"
 	"fmt"
-	"io/ioutil"
 	"log"
 	"net/http"
 	"strconv"
@@ -25,9 +23,10 @@ func InitPosts(e *gin.Engine, f engine.EngineFactory, endpoint string) {
 	p := e.Group(endpoint)
 	{
 		p.POST("/auth/post/add", post.add)
-		p.POST("/auth/post/edit", post.edit)
+		p.PUT("/auth/post/edit", post.edit)
 		p.GET("/auth/post/list", post.list)
 		p.GET("/auth/post/read", post.read)
+		p.DELETE("/auth/post/delete", post.delete)
 	}
 }
 
@@ -47,12 +46,9 @@ func (p post) list(c *gin.Context) {
 		Count: count,
 	}
 	res := p.List(ctx, req)
-	if c.Query("format") == "json" {
-		fmt.Println("here")
-		c.JSON(http.StatusOK, res.Posts)
-	} else {
-		c.HTML(http.StatusOK, "guestbook.html", res)
-	}
+
+	c.JSON(http.StatusOK, res.Posts)
+	c.Header("Content-Type", "application/json")
 }
 
 // add accepts a form post and creates a new
@@ -91,16 +87,10 @@ func (p post) add(c *gin.Context) {
 func (p post) read(c *gin.Context) {
 	ctx := getContext(c)
 
-	body, err := ioutil.ReadAll(c.Request.Body)
-	if err != nil {
-		log.Println(err)
-	}
-
-	var postData map[string]string
-	json.Unmarshal(body, &postData)
+	id := queryValue("id", c.Request)
 
 	req := &engine.ReadPostRequest{
-		ID: postData["id"],
+		ID: id,
 	}
 	repo := p.Read(ctx, req)
 	fmt.Println(repo)
@@ -116,35 +106,51 @@ func (p post) read(c *gin.Context) {
 	c.Header("Content-Type", "application/json")
 }
 
+func (p post) delete(c *gin.Context) {
+	ctx := getContext(c)
+
+	id := queryValue("id", c.Request)
+
+	req := &engine.RemovePostRequest{
+		ID: id,
+	}
+	repo := p.Remove(ctx, req)
+	fmt.Println(repo)
+
+	// TODO: token stuff
+
+	// res, err := u.GenerateToken()
+	// if err != nil {
+	// 	log.Println(err)
+	// }
+
+	c.JSON(http.StatusOK, repo)
+	c.Header("Content-Type", "application/json")
+}
+
 // edit ...
 func (p post) edit(c *gin.Context) {
-	// ctx := getContext(c)
-	// authToken := c.GetHeader("Authorization")
-	// authArr := strings.Split(authToken, " ")
-	// UUID := queryValue("uuid", c.Request)
-	// if len(authArr) != 2 {
-	// 	log.Println("Authentication header is invalid: " + authToken)
-	// 	http.Error(c.Writer, "Request failed!", http.StatusUnauthorized)
-	// }
+	ctx := getContext(c)
 
-	// jwtToken := authArr[1]
+	id := queryValue("id", c.Request)
 
-	// req := &engine.ProfileRequest{
-	// 	Token: jwtToken,
-	// 	ID:    UUID,
-	// }
+	fileName, err := FileUpload(c.Writer, c.Request)
+	if err != nil {
+		log.Println("error bya")
+	}
 
-	// repo := u.Profile(ctx, req)
+	req := &engine.UpdatePostRequest{
+		Author:       c.Request.FormValue("author"),
+		Topic:        c.Request.FormValue("topic"),
+		Category:     c.Request.FormValue("category"),
+		ContentText:  c.Request.FormValue("contentText"),
+		ContentPhoto: string(fileName),
+	}
 
-	// // TODO: token stuff
+	repo := p.Update(ctx, req, id)
 
-	// res, err := u.ParseToken(jwtToken)
-	// if err != nil {
-	// 	log.Println("err", err)
-	// }
+	// TODO: token stuff
 
-	// res["Post"] = repo.Payload
-
-	// c.Header("Content-Type", "application/json")
-	// c.JSON(http.StatusOK, res)
+	c.Header("Content-Type", "application/json")
+	c.JSON(http.StatusOK, repo)
 }

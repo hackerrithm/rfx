@@ -9,6 +9,7 @@ import (
 type (
 	// UpdatePostRequest ...
 	UpdatePostRequest struct {
+		ID           string
 		Author       string
 		Topic        string
 		Category     string
@@ -22,7 +23,7 @@ type (
 	}
 )
 
-func (p *post) Update(c context.Context, r *UpdatePostRequest) *UpdatePostResponse {
+func (p *post) Update(c context.Context, r *UpdatePostRequest, id string) *UpdatePostResponse {
 	// this is where all our app logic would go - the
 	// rules that apply to adding a Post whether it
 	// is being done via the web UI, a console app, or
@@ -30,6 +31,6 @@ func (p *post) Update(c context.Context, r *UpdatePostRequest) *UpdatePostRespon
 	post := domain.NewPost(r.Author, r.Topic, r.Category, r.ContentText, r.ContentPhoto)
 	// u.repository.Put(c, Post)
 	return &UpdatePostResponse{
-		ID: p.repository.Put(c, post),
+		ID: p.repository.Put(c, post, id),
 	}
 }

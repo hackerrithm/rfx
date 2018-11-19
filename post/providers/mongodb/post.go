@@ -46,7 +46,7 @@ func (r postRepository) Insert(c context.Context, p *domain.Post) string {
 	return "ok"
 }
 
-func (r postRepository) Put(c context.Context, p *domain.Post) string {
+func (r postRepository) Put(c context.Context, p *domain.Post, id string) string {
 	s := r.session.Clone()
 	defer s.Close()
 
@@ -58,8 +58,13 @@ func (r postRepository) Put(c context.Context, p *domain.Post) string {
 	post.ContentPhoto = p.ContentPhoto
 	post.ContentText = p.ContentText
 
+	bsonid := bson.ObjectIdHex(id)
+
+	//	col.UpdateId(bson.M{"_id": bsonid}, bson.M{"$set": bson.M{"author": post.Author})
+	//
+
 	col := s.DB("test1").C(postCollection)
-	col.Upsert(bson.M{"_id": p.ID}, p)
+	col.Update(bson.M{"_id": bsonid}, p)
 	return "ok"
 }
 
@@ -80,12 +85,26 @@ func (r postRepository) Read(c context.Context, id string) *domain.Post {
 	defer s.Close()
 
 	var post *domain.Post
-
-	err := s.DB("test1").C(postCollection).Find(bson.M{"_id": id}).One(&post)
+	bsonid := bson.ObjectIdHex(id)
+	err := s.DB("test1").C(postCollection).Find(bson.M{"_id": bsonid}).One(&post)
 
 	if err != nil {
 		return nil
 	}
 
 	return post
+}
+
+func (r postRepository) Remove(c context.Context, id string) string {
+	s := r.session.Clone()
+	defer s.Close()
+
+	bsonid := bson.ObjectIdHex(id)
+	err := s.DB("test1").C(postCollection).Remove(bson.M{"_id": bsonid}) //.One(&post)
+
+	if err != nil {
+		return ""
+	}
+
+	return "removed"
 }

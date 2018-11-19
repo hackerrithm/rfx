@@ -15,7 +15,7 @@ type (
 		Insert(c context.Context, post *domain.Post) string
 
 		// Put adds a new Post to the datastore
-		Put(c context.Context, post *domain.Post) string
+		Put(c context.Context, post *domain.Post, id string) string
 
 		// List returns existing posts matching the
 		// query provided
@@ -23,6 +23,9 @@ type (
 
 		// Read returns ...
 		Read(c context.Context, id string) *domain.Post
+
+		// Remove ...
+		Remove(c context.Context, id string) string
 	}
 
 	// StorageFactory is the interface that a storage

@@ -11,13 +11,16 @@ type (
 		Add(c context.Context, r *AddPostRequest) *AddPostResponse
 
 		// Update is the update-a-post use-case
-		Update(c context.Context, r *UpdatePostRequest) *UpdatePostResponse
+		Update(c context.Context, r *UpdatePostRequest, id string) *UpdatePostResponse
 
 		// List is the list-the-posts use-case
 		List(c context.Context, r *ListPostsRequest) *ListPostsResponse
 
 		// Read is the authenticate use-case
 		Read(c context.Context, r *ReadPostRequest) *ReadPostResponse
+
+		// Remove ...
+		Remove(c context.Context, r *RemovePostRequest) *RemovePostResponse
 	}
 
 	// post implementation

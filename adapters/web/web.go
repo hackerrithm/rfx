@@ -26,7 +26,7 @@ func init() {
 // Go web routers / frameworks (Gin, Echo, Goji etc...)
 // or just stick with the standard framework. Changing
 // should be far less costly.
-func NewWebAdapter(f1 usr.EngineFactory, f2 pst.EngineFactory, log bool) http.Handler {
+func NewWebAdapter(a usr.EngineFactory, b pst.EngineFactory, log bool) http.Handler {
 	var e *gin.Engine
 	if log {
 		e = gin.Default()
@@ -36,10 +36,8 @@ func NewWebAdapter(f1 usr.EngineFactory, f2 pst.EngineFactory, log bool) http.Ha
 		e = gin.New()
 	}
 
-	e.LoadHTMLGlob("templates/*")
-
-	usrWeb.InitUsers(e, f1, "/")
-	pstWeb.InitPosts(e, f2, "/")
+	usrWeb.InitUsers(e, a, "/")
+	pstWeb.InitPosts(e, b, "/")
 
 	return e
 }
