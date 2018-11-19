@@ -60,9 +60,6 @@ func (r postRepository) Put(c context.Context, p *domain.Post, id string) string
 
 	bsonid := bson.ObjectIdHex(id)
 
-	//	col.UpdateId(bson.M{"_id": bsonid}, bson.M{"$set": bson.M{"author": post.Author})
-	//
-
 	col := s.DB("test1").C(postCollection)
 	col.Update(bson.M{"_id": bsonid}, p)
 	return "ok"

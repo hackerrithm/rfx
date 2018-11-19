@@ -38,39 +38,3 @@ func NewPost(author, topic, category, text, photo string) *Post {
 		Date:         now(),
 	}
 }
-
-// // SetPassword sets Post's password
-// func (u *Post) SetPassword(p string) {
-// 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(p), bcrypt.DefaultCost)
-// 	if err != nil {
-// 		panic(err)
-// 	}
-
-// 	u.Password = string(hashedPassword)
-// }
-
-// // IsCredentialsVerified ...
-// func (u *Post) IsCredentialsVerified(password, hash string) bool {
-// 	err := bcrypt.CompareHashAndPassword([]byte(hash), []byte(password))
-// 	return err == nil
-// }
-
-// // NewContext creates a new context
-// func (u *Post) NewContext(ctx context.Context) context.Context {
-// 	return context.WithValue(ctx, postContextKey, u)
-// }
-
-// // PostFromContext gets Post from context
-// func PostFromContext(ctx context.Context) (*Post, bool) {
-// 	u, ok := ctx.Value(postContextKey).(*Post)
-// 	return u, ok
-// }
-
-// // PostMustFromContext gets Post from context. if can't make panic
-// func PostMustFromContext(ctx context.Context) *Post {
-// 	u, ok := ctx.Value(postContextKey).(*Post)
-// 	if !ok {
-// 		panic("Post can't get from request's context")
-// 	}
-// 	return u
-// }

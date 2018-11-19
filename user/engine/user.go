@@ -1,6 +1,8 @@
 package engine
 
 import (
+	"sync"
+
 	"golang.org/x/net/context"
 )
 
@@ -36,12 +38,20 @@ type (
 	}
 )
 
+var (
+	userInstance User
+	userOnce     sync.Once
+)
+
 // NewUser creates a new User interactor wired up
 // to use the user repository from the storage provider
 // that the engine has been setup to use.
 func (f *engineFactory) NewUser() User {
-	return &user{
-		repository: f.NewUserRepository(),
-		jwt:        f.JWTSignParser,
-	}
+	userOnce.Do(func() {
+		userInstance = &user{
+			repository: f.NewUserRepository(),
+			jwt:        f.JWTSignParser,
+		}
+	})
+	return userInstance
 }

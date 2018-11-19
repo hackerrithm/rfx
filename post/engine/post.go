@@ -1,6 +1,8 @@
 package engine
 
 import (
+	"sync"
+
 	"golang.org/x/net/context"
 )
 
@@ -30,12 +32,20 @@ type (
 	}
 )
 
+var (
+	postInstance Post
+	postOnce     sync.Once
+)
+
 // NewPost creates a new Post interactor wired up
 // to use the Post repository from the storage provider
 // that the engine has been setup to use.
 func (f *engineFactory) NewPost() Post {
-	return &post{
-		repository: f.NewPostRepository(),
-		// jwt:        f.JWTSignParser,
-	}
+	postOnce.Do(func() {
+		postInstance = &post{
+			repository: f.NewPostRepository(),
+			// jwt:        f.JWTSignParser,
+		}
+	})
+	return postInstance
 }

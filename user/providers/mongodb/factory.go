@@ -1,6 +1,7 @@
 package mongodb
 
 import (
+	"sync"
 	"time"
 
 	"gopkg.in/mgo.v2"
@@ -14,6 +15,11 @@ type (
 	}
 )
 
+var (
+	userRepositoryInstance engine.UserRepository
+	userRepositoryOnce     sync.Once
+)
+
 // NewStorage creates a new instance of this mongodb storage factory
 func NewStorage(url string) engine.StorageFactory {
 	session, _ := mgo.DialWithTimeout(url, 10*time.Second)
@@ -23,7 +29,10 @@ func NewStorage(url string) engine.StorageFactory {
 
 // NewUserRepository creates a new datastore user repository
 func (f *storageFactory) NewUserRepository() engine.UserRepository {
-	return newUserRepository(f.session)
+	userRepositoryOnce.Do(func() {
+		userRepositoryInstance = newUserRepository(f.session)
+	})
+	return userRepositoryInstance
 }
 
 func ensureIndexes(s *mgo.Session) {

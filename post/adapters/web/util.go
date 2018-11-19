@@ -99,11 +99,11 @@ func renderError(w http.ResponseWriter, message string, statusCode int) {
 }
 
 func randToken(len int, file multipart.File) string {
-	h := sha1.New()
-	io.Copy(h, file)
+	a := sha1.New()
+	io.Copy(a, file)
 	b := make([]byte, len)
 	rand.Read(b)
-	ve := h.Sum(nil)
+	ve := a.Sum(nil)
 	val := append(ve[:], b[:]...)
 	return fmt.Sprintf("%x", val)
 }
