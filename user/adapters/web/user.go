@@ -20,32 +20,18 @@ type (
 	}
 )
 
-// JWTData is a struct with the structure of the jwt data
-// type JWTData struct {
-// 	// Standard claims are the standard jwt claims from the IETF standard
-// 	// https://tools.ietf.org/html/rfc7519
-// 	jwt.StandardClaims
-// 	CustomClaims map[string]string `json:"custom,omitempty"`
-// }
-
 // InitUsers wire up the user routes
 func InitUsers(e *gin.Engine, f engine.EngineFactory, endpoint string) {
 	user := &user{f.NewUser()}
 	u := e.Group(endpoint)
 	{
-		u.POST("/auth/user/signup", user.add)
+		u.POST("/auth/user/signup", user.signup)
 		u.POST("/auth/user/login", user.login)
 		u.GET("/auth/list", user.list)
 		u.GET("/auth/user/profile", user.profile)
 	}
 }
 
-// list converts the parameters into an engine
-// request and then marshalls the results based
-// on the format requested, returning either an
-// html rendered page or JSON (to simulate basic
-// content negotiation). It's simpler if the UI
-// is a SPA and the web interface is just an API.
 func (u user) list(c *gin.Context) {
 	ctx := getContext(c)
 	count, err := strconv.Atoi(c.Query("count"))
@@ -64,11 +50,7 @@ func (u user) list(c *gin.Context) {
 	}
 }
 
-// add accepts a form post and creates a new
-// greoting in the system. It could be made a
-// lot smarter and automatically check for the
-// content type to handle forms, JSON etc...
-func (u user) add(c *gin.Context) {
+func (u user) signup(c *gin.Context) {
 	ctx := getContext(c)
 
 	body, err := ioutil.ReadAll(c.Request.Body)
@@ -128,7 +110,6 @@ func (u user) login(c *gin.Context) {
 	c.Header("Content-Type", "application/json")
 }
 
-// profile ...
 func (u user) profile(c *gin.Context) {
 	ctx := getContext(c)
 	authToken := c.GetHeader("Authorization")

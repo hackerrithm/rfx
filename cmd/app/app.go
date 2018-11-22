@@ -15,10 +15,14 @@ import (
 	"github.com/hackerrithm/longterm/rfx/user/providers/security"
 )
 
+func main() {
+	setup()
+}
+
 // when running in traditional or 'standalone' mode
 // we're going to use MongoDB as the storage provider
 // and start the webserver running ourselves.
-func main() {
+func setup() {
 	// s1 := greeterProvider.NewStorage("mongodb://localhost/test1")
 	up := userProvider.NewStorage("mongodb://localhost/test1")
 	pp := postProvider.NewStorage("mongodb://localhost/test1")

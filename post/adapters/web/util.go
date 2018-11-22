@@ -90,7 +90,7 @@ func appendValue(w http.ResponseWriter, c *http.Cookie, fname string) *http.Cook
 	return c
 }
 
-const maxUploadSize = 20000 * 1024
+const maxUploadSize = 9223372 //036854775807
 const uploadPath = ".../../../assets"
 
 func renderError(w http.ResponseWriter, message string, statusCode int) {
@@ -103,9 +103,9 @@ func randToken(len int, file multipart.File) string {
 	io.Copy(a, file)
 	b := make([]byte, len)
 	rand.Read(b)
-	ve := a.Sum(nil)
-	val := append(ve[:], b[:]...)
-	return fmt.Sprintf("%x", val)
+	c := a.Sum(nil)
+	d := append(c[:], b[:]...)
+	return fmt.Sprintf("%x", d)
 }
 
 // FileUpload ...
